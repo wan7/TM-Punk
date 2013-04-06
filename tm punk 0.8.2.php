@@ -18,13 +18,13 @@ $year = "2013";
 /**
  * @var string $version -> Set this php version :).
  */
-$version = "0.8.1";
+$version = "0.8.2";
 
 /**
  * @var string $release -> Set this script release date.
  * Note : Year-Day-Month
  */
-$release = "2013-11-02";
+$release = "2013-06-04";
 
 /**
  * @var string $user_agent -> Set php user agent when trying to request data with curl :).
@@ -100,6 +100,9 @@ Version 0.8 :-
 
 Version 0.8.1 :-
 - Add Optional Info.
+
+Version 0.8.2 :-
+- Add ping timeout.
 
 Thank to : Akif (for log function) and other people who support.
 		");
@@ -341,12 +344,14 @@ if(isset($argv[1]) && isset($argv[2])){
 					if(limit($downstream, $argv[$limit_value])){
 						$il++;
 						echo $a.".".$i." is ".$data_return."\n";
+						echo "Ping time : ".ping($a.".".$i)."\n";
 						echo $tunjuk;
 						echo "\n";
 					}
 				}else{
 					$il++;
 					echo $a.".".$i." is ".$data_return."\n";
+					echo "Ping time : ".ping($a.".".$i)."\n";
 					echo $tunjuk;
 					echo "\n";
 				}
@@ -359,12 +364,14 @@ if(isset($argv[1]) && isset($argv[2])){
 					if(limit($downstream, $argv[$limit_value])){
 						$il++;
 						echo $a.".".$i." is ".$data_return."\n";
+						echo "Ping time : ".ping($a.".".$i)."\n";
 						echo $tunjuk;
 						echo "\n";
 					}
 				}else{
 					$il++;
 					echo $a.".".$i." is ".$data_return."\n";
+					echo "Ping time : ".ping($a.".".$i)."\n";
 					echo $tunjuk;
 					echo "\n";
 				}
@@ -377,12 +384,14 @@ if(isset($argv[1]) && isset($argv[2])){
 					if(limit($downstream, $argv[$limit_value])){
 						$il++;
 						echo $a.".".$i." is ".$data_return."\n";
+						echo "Ping time : ".ping($a.".".$i)."\n";
 						echo $tunjuk;
 						echo "\n";
 					}
 				}else{
 					$il++;
 					echo $a.".".$i." is ".$data_return."\n";
+					echo "Ping time : ".ping($a.".".$i)."\n";
 					echo $tunjuk;
 					echo "\n";
 				}
@@ -399,12 +408,14 @@ if(isset($argv[1]) && isset($argv[2])){
 					if(limit($downstream, $argv[$limit_value])){
 						$il++;
 						echo $a.".".$i." is ".$data_return."\n";
+						echo "Ping time : ".ping($a.".".$i)."\n";
 						echo $tunjuk;
 						echo "\n";
 					}
 				}else{
 					$il++;
 					echo $a.".".$i." is ".$data_return."\n";
+					echo "Ping time : ".ping($a.".".$i)."\n";
 					echo $tunjuk;
 					echo "\n";
 				}
@@ -417,12 +428,14 @@ if(isset($argv[1]) && isset($argv[2])){
 					if(limit($downstream, $argv[$limit_value])){
 						$il++;
 						echo $a.".".$i." is ".$data_return."\n";
+						echo "Ping time : ".ping($a.".".$i)."\n";
 						echo $tunjuk;
 						echo "\n";
 					}
 				}else{
 					$il++;
 					echo $a.".".$i." is ".$data_return."\n";
+					echo "Ping time : ".ping($a.".".$i)."\n";
 					echo $tunjuk;
 					echo "\n";
 				}
@@ -1135,6 +1148,20 @@ function limit($down, $input){
 		}
 	}else{
 		return false;
+	}
+}
+
+/**
+ * Ping IP and get the time output result
+ * @param string $ip -> IP that need to ping
+ * @return string -> If regex success, return time otherwise return unknown string
+ */
+function ping($ip){
+	$ping_data = shell_exec("ping -n 1 -w 50 -i 6 ".$ip);
+	if(preg_match('/time\=(.*)\ \TTL/', $ping_data, $output)){
+		return $output[1];
+	}else{
+		return $output = "Unknown!";
 	}
 }
 
