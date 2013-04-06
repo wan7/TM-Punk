@@ -103,6 +103,7 @@ Version 0.8.1 :-
 
 Version 0.8.2 :-
 - Add ping timeout.
+- Add IP location tracker.
 
 Thank to : Akif (for log function) and other people who support.
 		");
@@ -345,6 +346,7 @@ if(isset($argv[1]) && isset($argv[2])){
 						$il++;
 						echo $a.".".$i." is ".$data_return."\n";
 						echo "Ping time : ".ping($a.".".$i)."\n";
+						echo "Location : ".get_geolocation($a.".".$i)."\n";
 						echo $tunjuk;
 						echo "\n";
 					}
@@ -352,6 +354,7 @@ if(isset($argv[1]) && isset($argv[2])){
 					$il++;
 					echo $a.".".$i." is ".$data_return."\n";
 					echo "Ping time : ".ping($a.".".$i)."\n";
+					echo "Location : ".get_geolocation($a.".".$i)."\n";
 					echo $tunjuk;
 					echo "\n";
 				}
@@ -365,6 +368,7 @@ if(isset($argv[1]) && isset($argv[2])){
 						$il++;
 						echo $a.".".$i." is ".$data_return."\n";
 						echo "Ping time : ".ping($a.".".$i)."\n";
+						echo "Location : ".get_geolocation($a.".".$i)."\n";
 						echo $tunjuk;
 						echo "\n";
 					}
@@ -372,6 +376,7 @@ if(isset($argv[1]) && isset($argv[2])){
 					$il++;
 					echo $a.".".$i." is ".$data_return."\n";
 					echo "Ping time : ".ping($a.".".$i)."\n";
+					echo "Location : ".get_geolocation($a.".".$i)."\n";
 					echo $tunjuk;
 					echo "\n";
 				}
@@ -385,6 +390,7 @@ if(isset($argv[1]) && isset($argv[2])){
 						$il++;
 						echo $a.".".$i." is ".$data_return."\n";
 						echo "Ping time : ".ping($a.".".$i)."\n";
+						echo "Location : ".get_geolocation($a.".".$i)."\n";
 						echo $tunjuk;
 						echo "\n";
 					}
@@ -392,6 +398,7 @@ if(isset($argv[1]) && isset($argv[2])){
 					$il++;
 					echo $a.".".$i." is ".$data_return."\n";
 					echo "Ping time : ".ping($a.".".$i)."\n";
+					echo "Location : ".get_geolocation($a.".".$i)."\n";
 					echo $tunjuk;
 					echo "\n";
 				}
@@ -409,6 +416,7 @@ if(isset($argv[1]) && isset($argv[2])){
 						$il++;
 						echo $a.".".$i." is ".$data_return."\n";
 						echo "Ping time : ".ping($a.".".$i)."\n";
+						echo "Location : ".get_geolocation($a.".".$i)."\n";
 						echo $tunjuk;
 						echo "\n";
 					}
@@ -416,6 +424,7 @@ if(isset($argv[1]) && isset($argv[2])){
 					$il++;
 					echo $a.".".$i." is ".$data_return."\n";
 					echo "Ping time : ".ping($a.".".$i)."\n";
+					echo "Location : ".get_geolocation($a.".".$i)."\n";
 					echo $tunjuk;
 					echo "\n";
 				}
@@ -429,6 +438,7 @@ if(isset($argv[1]) && isset($argv[2])){
 						$il++;
 						echo $a.".".$i." is ".$data_return."\n";
 						echo "Ping time : ".ping($a.".".$i)."\n";
+						echo "Location : ".get_geolocation($a.".".$i)."\n";
 						echo $tunjuk;
 						echo "\n";
 					}
@@ -436,6 +446,7 @@ if(isset($argv[1]) && isset($argv[2])){
 					$il++;
 					echo $a.".".$i." is ".$data_return."\n";
 					echo "Ping time : ".ping($a.".".$i)."\n";
+					echo "Location : ".get_geolocation($a.".".$i)."\n";
 					echo $tunjuk;
 					echo "\n";
 				}
@@ -1162,6 +1173,29 @@ function ping($ip){
 		return $output[1];
 	}else{
 		return $output = "Unknown!";
+	}
+}
+
+/**
+ * Get Location of that IP address
+ * @param string $ip -> IP that need to get location
+ * @return string -> Return location
+ */
+function get_geolocation($ip){
+	$data = curl("http://www.find-ip-address.org/ip-address-locator.php", "", "scrollx=0&scrolly=300&ip=".$ip);
+	preg_match_all('/\<font color\=\'#980000\'\>(.*?)\<\/font\>/', $data, $pecah_string);
+	if(!empty($pecah_string[1][2]) && !empty($pecah_string[1][3])){
+		if(!empty($pecah_string[1][2]) && empty($pecah_string[1][3])){
+			return $pecah_string[1][2];
+		}elseif(empty($pecah_string[1][2]) && !empty($pecah_string[1][3])){
+			return $pecah_string[1][3];
+		}elseif($pecah_string[1][2] == $pecah_string[1][3]){
+			return $pecah_string[1][2];
+		}else{
+			return $pecah_string[1][3].", ".$pecah_string[1][2];
+		}
+	}else{
+		return "Unknown!";
 	}
 }
 
