@@ -18,13 +18,13 @@ $year = "2013";
 /**
  * @var string $version -> Set this php version :).
  */
-$version = "0.8.3";
+$version = "0.9";
 
 /**
  * @var string $release -> Set this script release date.
  * Note : Year-Day-Month
  */
-$release = "2013-05-04";
+$release = "2013-05-15";
 
 /**
  * @var string $user_agent -> Set php user agent when trying to request data with curl :).
@@ -114,6 +114,11 @@ if(isset($argv[1]) && $argv[1] == "-v"){
 		\rVersion 0.8.3 :-
 		\r- Repair file save function.
 		\r- Minor change.
+		
+		\rVersion 0.9 :-
+		\r Website checking for online or offline function is now multithread.
+		\r Geo Location function is not default now. (You must select it in options)
+		\r Script scanning speed now up to 50%. (thank to curl multithread).
 
 		\rThank to : Akif (for log function) and other people who support.
 		");
@@ -130,7 +135,7 @@ if(in_array("-reboot", $argv, true)){
 	$value = $key + 1;
 	$ip = $argv[$value];
 	if(!filter_var($ip, FILTER_VALIDATE_IP)){ echo "\nIncorrect IP Address Format\n";die(); }
-	if(check($ip) != TRUE){ echo "\nIP address ".$ip." didn't exist :(\n";die(); }
+	if(check_old($ip) != TRUE){ echo "\nIP address ".$ip." didn't exist :(\n";die(); }
 	$data = curl($ip);
 	$info_return = checkdata($data);
 	if($info_return == "Innacom"){
@@ -189,6 +194,13 @@ if(in_array("-limit", $argv, true)){
 	}
 }
 
+/**
+ * Geolocation argument
+ */
+ 
+if(in_array("-geol", $argv, true)){
+	$geol = true;
+}
 
 
 /**
@@ -232,7 +244,7 @@ if(in_array("-g", $argv, true)){
  */
 if(isset($argv[1]) && $argv[1] == "-c"){
 	
-	if(!check("http://google.com/")){
+	if(!check_old("http://google.com/")){
 		echo "\nYour computer look like didn't have internet connection !\n";
 		echo "Internet is important if u want to use this service\n";
 		echo "Exiting...\n";
@@ -320,6 +332,7 @@ if(!isset($argv[1]) || $argv[1] == "-help" || $argv[1] == "-h" || $argv[1] == "/
 		\r -limit <speed> : Filter output from result. (In 2mb,4mb & 8mb).
 		\r -reboot <ip> : Automatically reboot those router ;).
 		\r -verbose : Verbose Mode. (Default = ".$verbose_check.")
+		\r -geol : Get location of streamyx user.
 		");
 }
 
@@ -365,152 +378,181 @@ if(isset($ip) && isset($range)){
 	if(!empty($filesave)){
 		file_put_contents($filesave, $give, FILE_APPEND);
 	}
+	$collect_ip = array();
 	for($i = $range_if[0]; $i <= $range_if[1]; $i++){
+		$collect_ip[] = "http://".$a.".".$i."/";
+	}
+	$data_check_return = check($collect_ip);
+	$online = array();
+	foreach($data_check_return as $b => $k){
+		if(!empty($k)){
+			$online[] = $b + 1;
+		}
+	}
+	foreach($online as $i){
 		if($verbose){
 			echo "Checking for ".$a.".".$i." if online\n";
 		}
-		if(check($a.".".$i)){
-			$data = curl($a.".".$i, "", "");
-			if($verbose){
-				echo "Checking data for ".$a.".".$i."\n";
-			}
-			$data_return = checkdata($data, $a.".".$i);
-			if($data_return == "Innacom")
-			{
-				$tunjuk = Innacom($a.".".$i, $filesave);
-				if(isset($limit_bool) && $limit_bool == "set"){
-					$downstream = getdownstream($tunjuk);
-					if(limit($downstream, $argv[$limit_value])){
-						$il++;
-						echo $a.".".$i." is ".$data_return."\n";
-						echo "Ping time : ".ping($a.".".$i)."\n";
-						echo "Location : ".get_geolocation($a.".".$i)."\n";
-						echo $tunjuk;
-						echo "\n";
-					}
-				}else{
+		$data = curl($a.".".$i, "", "");
+		if($verbose){
+			echo "Checking data for ".$a.".".$i."\n";
+		}
+		$data_return = checkdata($data, $a.".".$i);
+		if($data_return == "Innacom")
+		{
+			$tunjuk = Innacom($a.".".$i, $filesave);
+			if(isset($limit_bool) && $limit_bool == "set"){
+				$downstream = getdownstream($tunjuk);
+				if(limit($downstream, $argv[$limit_value])){
 					$il++;
 					echo $a.".".$i." is ".$data_return."\n";
 					echo "Ping time : ".ping($a.".".$i)."\n";
-					echo "Location : ".get_geolocation($a.".".$i)."\n";
+					if($geol){
+						echo "Location : ".get_geolocation($a.".".$i)."\n";
+					}
 					echo $tunjuk;
 					echo "\n";
 				}
-			}
-			elseif($data_return == "ASUS DSL-N12U")
-			{
-				$tunjuk = asus($a.".".$i, $filesave);
-				if(isset($limit_bool) && $limit_bool == "set"){
-					$downstream = getdownstream($tunjuk);
-					if(limit($downstream, $argv[$limit_value])){
-						$il++;
-						echo $a.".".$i." is ".$data_return."\n";
-						echo "Ping time : ".ping($a.".".$i)."\n";
+			}else{
+				$il++;
+				echo $a.".".$i." is ".$data_return."\n";
+				echo "Ping time : ".ping($a.".".$i)."\n";
+				if($geol){
 						echo "Location : ".get_geolocation($a.".".$i)."\n";
-						echo $tunjuk;
-						echo "\n";
 					}
-				}else{
+				echo $tunjuk;
+				echo "\n";
+			}
+		}
+		elseif($data_return == "ASUS DSL-N12U")
+		{
+			$tunjuk = asus($a.".".$i, $filesave);
+			if(isset($limit_bool) && $limit_bool == "set"){
+				$downstream = getdownstream($tunjuk);
+				if(limit($downstream, $argv[$limit_value])){
 					$il++;
 					echo $a.".".$i." is ".$data_return."\n";
 					echo "Ping time : ".ping($a.".".$i)."\n";
-					echo "Location : ".get_geolocation($a.".".$i)."\n";
+					if($geol){
+						echo "Location : ".get_geolocation($a.".".$i)."\n";
+					}
 					echo $tunjuk;
 					echo "\n";
 				}
-			}
-			elseif($data_return == "TP-Link TD-W8901G")
-			{
-				$tunjuk = TpLink($a.".".$i, $filesave);
-				if(isset($limit_bool) && $limit_bool == "set"){
-					$downstream = getdownstream($tunjuk);
-					if(limit($downstream, $argv[$limit_value])){
-						$il++;
-						echo $a.".".$i." is ".$data_return."\n";
-						echo "Ping time : ".ping($a.".".$i)."\n";
+			}else{
+				$il++;
+				echo $a.".".$i." is ".$data_return."\n";
+				echo "Ping time : ".ping($a.".".$i)."\n";
+				if($geol){
 						echo "Location : ".get_geolocation($a.".".$i)."\n";
-						echo $tunjuk;
-						echo "\n";
 					}
-				}else{
+				echo $tunjuk;
+				echo "\n";
+			}
+		}
+		elseif($data_return == "TP-Link TD-W8901G")
+		{
+			$tunjuk = TpLink($a.".".$i, $filesave);
+			if(isset($limit_bool) && $limit_bool == "set"){
+				$downstream = getdownstream($tunjuk);
+				if(limit($downstream, $argv[$limit_value])){
 					$il++;
 					echo $a.".".$i." is ".$data_return."\n";
 					echo "Ping time : ".ping($a.".".$i)."\n";
-					echo "Location : ".get_geolocation($a.".".$i)."\n";
+					if($geol){
+						echo "Location : ".get_geolocation($a.".".$i)."\n";
+					}
 					echo $tunjuk;
 					echo "\n";
 				}
-			}
-			elseif($data_return == "D-Link")
-			{	
-				if(strpos($data, "SEA_1.01")){
-					$tunjuk = dlink($a.".".$i, "SEA_1.01", $filesave);
-				}else{
-					$tunjuk = dlink($a.".".$i, "", $filesave);
-				}
-				if(isset($limit_bool) && $limit_bool == "set"){
-					$downstream = getdownstream($tunjuk);
-					if(limit($downstream, $argv[$limit_value])){
-						$il++;
-						echo $a.".".$i." is ".$data_return."\n";
-						echo "Ping time : ".ping($a.".".$i)."\n";
+			}else{
+				$il++;
+				echo $a.".".$i." is ".$data_return."\n";
+				echo "Ping time : ".ping($a.".".$i)."\n";
+				if($geol){
 						echo "Location : ".get_geolocation($a.".".$i)."\n";
-						echo $tunjuk;
-						echo "\n";
 					}
-				}else{
+				echo $tunjuk;
+				echo "\n";
+			}
+		}
+		elseif($data_return == "D-Link")
+		{	
+			if(strpos($data, "SEA_1.01")){
+				$tunjuk = dlink($a.".".$i, "SEA_1.01", $filesave);
+			}else{
+				$tunjuk = dlink($a.".".$i, "", $filesave);
+			}
+			if(isset($limit_bool) && $limit_bool == "set"){
+				$downstream = getdownstream($tunjuk);
+				if(limit($downstream, $argv[$limit_value])){
 					$il++;
 					echo $a.".".$i." is ".$data_return."\n";
 					echo "Ping time : ".ping($a.".".$i)."\n";
-					echo "Location : ".get_geolocation($a.".".$i)."\n";
+					if($geol){
+						echo "Location : ".get_geolocation($a.".".$i)."\n";
+					}
 					echo $tunjuk;
 					echo "\n";
 				}
-			}
-			elseif($data_return == "Zyxel P-600")
-			{	
-				$tunjuk = zyxel($a.".".$i, $filesave);
-				if(isset($limit_bool) && $limit_bool == "set"){
-					$downstream = getdownstream($tunjuk);
-					if(limit($downstream, $argv[$limit_value])){
-						$il++;
-						echo $a.".".$i." is ".$data_return."\n";
-						echo "Ping time : ".ping($a.".".$i)."\n";
+			}else{
+				$il++;
+				echo $a.".".$i." is ".$data_return."\n";
+				echo "Ping time : ".ping($a.".".$i)."\n";
+				if($geol){
 						echo "Location : ".get_geolocation($a.".".$i)."\n";
-						echo $tunjuk;
-						echo "\n";
 					}
-				}else{
+				echo $tunjuk;
+				echo "\n";
+			}
+		}
+		elseif($data_return == "Zyxel P-600")
+		{	
+			$tunjuk = zyxel($a.".".$i, $filesave);
+			if(isset($limit_bool) && $limit_bool == "set"){
+				$downstream = getdownstream($tunjuk);
+				if(limit($downstream, $argv[$limit_value])){
 					$il++;
 					echo $a.".".$i." is ".$data_return."\n";
 					echo "Ping time : ".ping($a.".".$i)."\n";
-					echo "Location : ".get_geolocation($a.".".$i)."\n";
+					if($geol){
+						echo "Location : ".get_geolocation($a.".".$i)."\n";
+					}
 					echo $tunjuk;
 					echo "\n";
 				}
+			}else{
+				$il++;
+				echo $a.".".$i." is ".$data_return."\n";
+				echo "Ping time : ".ping($a.".".$i)."\n";
+				if($geol){
+						echo "Location : ".get_geolocation($a.".".$i)."\n";
+					}
+				echo $tunjuk;
+				echo "\n";
 			}
-			else
-			{
-				if(isset($data_return)){
-					if($optional){
-						echo $a.".".$i." is ".$data_return."\n";
-						$il++;
-						$give = "IP : $a.$i \r\nDevice : ".$data_return."\r\nStatus : Method not implemented\r\n";
+		}
+		else
+		{
+			if(isset($data_return)){
+				if($optional){
+					echo $a.".".$i." is ".$data_return."\n";
+					$il++;
+					$give = "IP : $a.$i \r\nDevice : ".$data_return."\r\nStatus : Method not implemented\r\n";
+					if(!empty($filesave)){
+						file_put_contents($filesave, $give, FILE_APPEND);
+					}
+					echo "\n";
+				}
+			}else{
+				if($optional){
+					$il++;
+					echo $a.".".$i." exist but no data for this IP\n";
+						$give = "IP : $a.$i \r\nDevice : unknown\r\nStatus : Unknown device\r\n";
 						if(!empty($filesave)){
 							file_put_contents($filesave, $give, FILE_APPEND);
 						}
-						echo "\n";
-					}
-				}else{
-					if($optional){
-						$il++;
-						echo $a.".".$i." exist but no data for this IP\n";
-							$give = "IP : $a.$i \r\nDevice : unknown\r\nStatus : Unknown device\r\n";
-							if(!empty($filesave)){
-								file_put_contents($filesave, $give, FILE_APPEND);
-							}
-						echo "\n";
-					}
+					echo "\n";
 				}
 			}
 		}
@@ -542,10 +584,49 @@ $list = array(
 	  );
 
 /**
- * @param string $url -> Check if host exist in port 80.
- * @return bool -> Return true if host exist.
+ * @param string array $url -> Check if host exist in port 80.
+ * @return string array -> Return true if host exist.
  */
-function check($url){
+ 
+function check($data, $options = array()){
+	$curly = array();
+	$result = array();
+	$mh = curl_multi_init();
+	foreach($data as $id => $d) {
+		$curly[$id] = curl_init();
+		$url = (is_array($d) && !empty($d['url'])) ? $d['url'] : $d;
+		curl_setopt($curly[$id], CURLOPT_URL, $url);
+		curl_setopt($curly[$id], CURLOPT_HEADER, 0);
+		curl_setopt($curly[$id], CURLOPT_RETURNTRANSFER, 1);
+		if (is_array($d)) {
+			if (!empty($d['post'])) {
+				curl_setopt($curly[$id], CURLOPT_POST, 1);
+				curl_setopt($curly[$id], CURLOPT_POSTFIELDS, $d['post']);
+			}
+		}
+		curl_setopt($curly[$id],CURLOPT_TIMEOUT, 1);
+		if (!empty($options)) {
+			curl_setopt_array($curly[$id], $options);
+		}
+		curl_multi_add_handle($mh, $curly[$id]);
+	}
+	$running = null;
+	do {
+		curl_multi_exec($mh, $running);
+	}
+	while ($running > 0);
+	foreach($curly as $id => $c) {
+		$result[$id] = curl_multi_getcontent($c);
+		curl_multi_remove_handle($mh, $c);
+	}
+	curl_multi_close($mh);
+	return $result;
+}
+ 
+/**
+ * Old version
+ */
+function check_old($url){
 	global $verbose;
 	if($verbose){
 		echo "Trying to connect with ".$url."\n";
@@ -583,6 +664,8 @@ function checkdata($data, $ip = ""){
 			return "Innacom";
 		}elseif(strpos($get, "logo_dlink.jpg")){
 			return "DSL-2640B Wireless Router";
+		}elseif(strpos($get, "DSL-2750U")){
+			return "DSL-2750U";
 		}
 	}elseif(strpos($data, "<A HREF='/login.rsp'>here</a></")){
 		$pecah = cutstr($data, "HREF='", "'");
@@ -632,6 +715,14 @@ function checkdata($data, $ip = ""){
 		return "BattleLAN Network";
 	}elseif(strpos($data, "WebDVR")){
 		return "WebDVR";
+	}elseif(strpos($data, "RouterOS")){
+		return "RouterOS ";
+	}elseif(strpos($data, "WebCam")){
+		return "WebCam";
+	}elseif(strpos($data, "DVR-04CH")){
+		return "DVR-04CH";
+	}elseif(strpos($data, "Network video client")){
+		return "Network video client";
 	}
 }
 
