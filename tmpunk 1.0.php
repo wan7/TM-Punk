@@ -18,13 +18,13 @@ $year = "2013";
 /**
  * @var string $version -> Set this php version :).
  */
-$version = "0.9";
+$version = "1.0";
 
 /**
  * @var string $release -> Set this script release date.
  * Note : Year-Day-Month
  */
-$release = "2013-05-15";
+$release = "2013-06-29";
 
 /**
  * @var string $user_agent -> Set php user agent when trying to request data with curl :).
@@ -116,12 +116,36 @@ if(isset($argv[1]) && $argv[1] == "-v"){
 		\r- Minor change.
 		
 		\rVersion 0.9 :-
-		\r Website checking for online or offline function is now multithread.
-		\r Geo Location function is not default now. (You must select it in options)
-		\r Script scanning speed now up to 50%. (thank to curl multithread).
+		\r- Website checking for online or offline function is now multithread.
+		\r- Geo Location function is not default now. (You must select it in options)
+		\r- Script scanning speed now up to 50%. (thank to curl multithread).
+		
+		\rVersion 0.9.1 :-
+		\r- Minor Update (don't use much bandwidth for service verification after this)
+		
+		\rVersion 1.0 :-
+		\r- Add auto streamyx connect (-con and -connect) (for Windows user only!)
 
 		\rThank to : Akif (for log function) and other people who support.
-		");
+	");
+}
+
+/**
+ * Con (Connect) argument for reboot function
+ */
+if(in_array("-con", $argv, true)){
+	if(strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN'){
+		die("\nThis 'con' function only can be use in Windows OS only!\n");
+	}
+	$con = true;
+	$key = array_search("-con", $argv);
+	if(!in_array("-reboot", $argv, true)){
+		die("\n'con' argument must be use with 'reboot' argument\n");
+	}elseif(!isset($argv[$key+1])){
+		die("\nCon Error ! -> Must set connection name");
+	}
+	$value = $key + 1;
+	$name_connect_con = $argv[$value];
 }
 
 /**
@@ -139,36 +163,102 @@ if(in_array("-reboot", $argv, true)){
 	$data = curl($ip);
 	$info_return = checkdata($data);
 	if($info_return == "Innacom"){
+		if($con){ $data = Innacom($ip); }
 		$result = innacom_reboot($ip);
 		if($result == true){
-			echo "\n".$ip." is rebooting now !\n";die();
+			echo "\n".$ip." is rebooting now !\n";
 		}else{
-			echo "\nError when trying to reboot Router at ".$ip."!\n";die();
+			echo "\nError when trying to reboot Router at ".$ip."!\n";
+		}
+		if($con){
+			preg_match('/User \: (.*)/', $data, $username);
+			preg_match('/Pass \: (.*)/', $data, $password);
+			$connect = rasdial($name_connect_con, $username[1], $password[1]);
+			if($connect == "name" && $connect != 1){
+				echo "\n'".$name_connect_con."' is not exist in this computer!\n";
+			}elseif($connect == "already" && $connect != 1){
+				echo "\n'".$name_connect_con."' is already connected!\n";
+			}elseif($connect == "up" && $connect != 1){
+				echo "\nUsername '".$username[1]."' and password '".$password[1]."' is not recognized!\n";
+			}else{
+				echo "\nSuccessful Connect!\n";
+			}
 		}
 	}elseif($info_return == "D-Link"){
-		if(strpos($data, "SEA_1.01")){ $result = dlink_reboot($ip, "SEA_1.01"); }else{ $result = dlink_reboot($ip, ""); }
-		if($result == true){
-			echo "\n".$ip." is rebooting now !\n";die();
+		if(strpos($data, "SEA_1.01")){
+			if($con){ $data = dlink($ip, "SEA_1.01"); }
+			$result = dlink_reboot($ip, "SEA_1.01");
 		}else{
-			echo "\nError when trying to reboot Router at ".$ip."!\n";die();
+			if($con){ $data = dlink($ip, ""); }
+			$result = dlink_reboot($ip, "");
+		}
+		if($result == true){
+			echo "\n".$ip." is rebooting now !\n";
+		}else{
+			echo "\nError when trying to reboot Router at ".$ip."!\n";
+		}
+		if($con){
+			preg_match('/User \: (.*)/', $data, $username);
+			preg_match('/Pass \: (.*)/', $data, $password);
+			$connect = rasdial($name_connect_con, $username[1], $password[1]);
+			if($connect == "name" && $connect != 1){
+				echo "\n'".$name_connect_con."' is not exist in this computer!\n";
+			}elseif($connect == "already" && $connect != 1){
+				echo "\n'".$name_connect_con."' is already connected!\n";
+			}elseif($connect == "up" && $connect != 1){
+				echo "\nUsername '".$username[1]."' and password '".$password[1]."' is not recognized!\n";
+			}else{
+				echo "\nSuccessful Connect!\n";
+			}
 		}
 	}elseif($info_return == "TP-Link TD-W8901G"){
+		if($con){ $data = TpLink($ip); }
 		$result = TpLink_reboot($ip);
 		if($result == true){
-			echo "\n".$ip." is rebooting now !\n";die();
+			echo "\n".$ip." is rebooting now !\n";
 		}else{
-			echo "\nError when trying to reboot Router at ".$ip."!\n";die();
+			echo "\nError when trying to reboot Router at ".$ip."!\n";
+		}
+		if($con){
+			preg_match('/User \: (.*)/', $data, $username);
+			preg_match('/Pass \: (.*)/', $data, $password);
+			$connect = rasdial($name_connect_con, $username[1], $password[1]);
+			if($connect == "name" && $connect != 1){
+				echo "\n'".$name_connect_con."' is not exist in this computer!\n";
+			}elseif($connect == "already" && $connect != 1){
+				echo "\n'".$name_connect_con."' is already connected!\n";
+			}elseif($connect == "up" && $connect != 1){
+				echo "\nUsername '".$username[1]."' and password '".$password[1]."' is not recognized!\n";
+			}else{
+				echo "\nSuccessful Connect!\n";
+			}
 		}
 	}elseif($info_return == "Zyxel P-600"){
+		if($con){ $data = zyxel($ip); }
 		$result = zyxel_reboot($ip);
 		if($result == true){
-			echo "\n".$ip." is rebooting now !\n";die();
+			echo "\n".$ip." is rebooting now !\n";
 		}else{
-			echo "\nError when trying to reboot Router at ".$ip."!\n";die();
+			echo "\nError when trying to reboot Router at ".$ip."!\n";
+		}
+		if($con){
+			preg_match('/User \: (.*)/', $data, $username);
+			preg_match('/Pass \: (.*)/', $data, $password);
+			$connect = rasdial($name_connect_con, $username[1], $password[1]);
+			if($connect == "name" && $connect != 1){
+				echo "\n'".$name_connect_con."' is not exist in this computer!\n";
+			}elseif($connect == "already" && $connect != 1){
+				echo "\n'".$name_connect_con."' is already connected!\n";
+			}elseif($connect == "up" && $connect != 1){
+				echo "\nUsername '".$username[1]."' and password '".$password[1]."' is not recognized!\n";
+			}else{
+				echo "\nSuccessful Connect!\n";
+			}
 		}
 	}else{
-		echo "\nCan't determine what Router for ".$ip." :(\n";die();
+		echo "\nCan't determine what Router for ".$ip." :(\n";
 	}
+	die();
 }
 
 /**
@@ -191,6 +281,33 @@ if(in_array("-limit", $argv, true)){
 		echo "Exiting!\n";
 		sleep(1);
 		die();
+	}
+}
+
+/**
+ * Connect argument
+ */
+if(in_array("-connect", $argv, true)){
+	if(strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN'){
+		die("\nThis 'connect' function only can be use in Windows OS only!\n");
+	}
+	$find_key = array_search("-connect", $argv);
+	if(!isset($argv[$find_key + 1]) || !isset($argv[$find_key + 2]) || !isset($argv[$find_key + 3])){
+		die("\nPlease make sure connect argument have 3 perimeter!\n");
+	}else{
+		$name_connect = $argv[$find_key + 1];
+		$username_connect = $argv[$find_key + 2];
+		$password_connect = $argv[$find_key + 3];
+		$connect = rasdial($name_connect, $username_connect, $password_connect);
+		if($connect == "name" && $connect != 1){
+			echo "\n'".$name_connect."' is not exist in this computer!\n";
+		}elseif($connect == "already" && $connect != 1){
+			echo "\n'".$name_connect."' is already connected!\n";
+		}elseif($connect == "up" && $connect != 1){
+			echo "\nUsername '".$username_connect."' and password '".$password_connect."' is not recognized!\n";
+		}else{
+			echo "\nSuccessful Connect!\n";
+		}
 	}
 }
 
@@ -327,10 +444,12 @@ if(!isset($argv[1]) || $argv[1] == "-help" || $argv[1] == "-h" || $argv[1] == "/
 		\r -g : Get optional info that you must know :)
 		\r -save <filename> : Save result in specific file.
 		\r -c <filename> : Check streamyx account if that account can use in 
-		\r				 streamyx mail system.
+		\r		 streamyx mail system.
 		\r -v : Show what version of TM Punk you have now.
 		\r -limit <speed> : Filter output from result. (In 2mb,4mb & 8mb).
+		\r -connect <name> <username> <password> : Use for creating PPPOE connection
 		\r -reboot <ip> : Automatically reboot those router ;).
+		\r -con <name> : Use for creating PPPOE connection (for -reboot only!)
 		\r -verbose : Verbose Mode. (Default = ".$verbose_check.")
 		\r -geol : Get location of streamyx user.
 		");
@@ -367,7 +486,7 @@ if(isset($ip) && isset($range)){
 	}
 	$a = explode(".", $streamyx_ip);
 	if($verbose){
-		echo "\nTry to parse IP address to valit input\n";
+		echo "\nTry to parse IP address to valid input\n";
 	}
 	$a = $a[0].".".$a[1].".".$a[2];
 	echo "\nScanning ".$a.".".$range."... \n\n";
@@ -393,7 +512,7 @@ if(isset($ip) && isset($range)){
 		if($verbose){
 			echo "Checking for ".$a.".".$i." if online\n";
 		}
-		$data = curl($a.".".$i, "", "");
+		$data = $data_check_return[($i - 1)];
 		if($verbose){
 			echo "Checking data for ".$a.".".$i."\n";
 		}
@@ -418,8 +537,8 @@ if(isset($ip) && isset($range)){
 				echo $a.".".$i." is ".$data_return."\n";
 				echo "Ping time : ".ping($a.".".$i)."\n";
 				if($geol){
-						echo "Location : ".get_geolocation($a.".".$i)."\n";
-					}
+					echo "Location : ".get_geolocation($a.".".$i)."\n";
+				}
 				echo $tunjuk;
 				echo "\n";
 			}
@@ -444,8 +563,8 @@ if(isset($ip) && isset($range)){
 				echo $a.".".$i." is ".$data_return."\n";
 				echo "Ping time : ".ping($a.".".$i)."\n";
 				if($geol){
-						echo "Location : ".get_geolocation($a.".".$i)."\n";
-					}
+					echo "Location : ".get_geolocation($a.".".$i)."\n";
+				}
 				echo $tunjuk;
 				echo "\n";
 			}
@@ -470,8 +589,8 @@ if(isset($ip) && isset($range)){
 				echo $a.".".$i." is ".$data_return."\n";
 				echo "Ping time : ".ping($a.".".$i)."\n";
 				if($geol){
-						echo "Location : ".get_geolocation($a.".".$i)."\n";
-					}
+					echo "Location : ".get_geolocation($a.".".$i)."\n";
+				}
 				echo $tunjuk;
 				echo "\n";
 			}
@@ -500,8 +619,8 @@ if(isset($ip) && isset($range)){
 				echo $a.".".$i." is ".$data_return."\n";
 				echo "Ping time : ".ping($a.".".$i)."\n";
 				if($geol){
-						echo "Location : ".get_geolocation($a.".".$i)."\n";
-					}
+					echo "Location : ".get_geolocation($a.".".$i)."\n";
+				}
 				echo $tunjuk;
 				echo "\n";
 			}
@@ -526,8 +645,8 @@ if(isset($ip) && isset($range)){
 				echo $a.".".$i." is ".$data_return."\n";
 				echo "Ping time : ".ping($a.".".$i)."\n";
 				if($geol){
-						echo "Location : ".get_geolocation($a.".".$i)."\n";
-					}
+					echo "Location : ".get_geolocation($a.".".$i)."\n";
+				}
 				echo $tunjuk;
 				echo "\n";
 			}
@@ -604,7 +723,7 @@ function check($data, $options = array()){
 				curl_setopt($curly[$id], CURLOPT_POSTFIELDS, $d['post']);
 			}
 		}
-		curl_setopt($curly[$id],CURLOPT_TIMEOUT, 1);
+		curl_setopt($curly[$id],CURLOPT_TIMEOUT, 10);
 		if (!empty($options)) {
 			curl_setopt_array($curly[$id], $options);
 		}
@@ -733,6 +852,26 @@ function removecurly($string){
 	$remove = str_replace("{", "", $string);
 	$remove = str_replace("}", "", $remove);
 	return $remove;
+}
+
+/**
+ * @param string $name_connect -> Broadband name
+ * @param string $username_connect -> Username that want to connect
+ * @param string $password_connect -> Password for that username
+ * @return string & boolean -> Return string if failed and boolean if success
+ */
+function rasdial($name, $username, $password){
+	if(strpos(shell_exec('rasdial "'.$name.'"'), 'error 623')){
+		return 'name';
+	}
+	$connect = shell_exec('rasdial "'.$name.'" "'.$username.'" "'.$password.'"');
+	if(strpos($connect, 'already connected')){
+		return 'already';
+	}elseif(strpos($connect, 'error 691')){
+		return 'up';
+	}elseif(strpos($connect, 'Successfully connected')){
+		return true;
+	}
 }
 
 /**
