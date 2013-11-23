@@ -3,31 +3,32 @@
 //
 // Debug Mode
 //
-// Sometime script can't run, just set 'on' this section to see the
+// Sometime script can't run, just set true this section to see the
 // error and fix it yourself. ;)
+// otherwise set false
 //
-$debug_mode = "on";
+$debug_mode = false;
 
 //
 // Set this php year.
 //
-$year = "2013";
+define('year', '2013');
 
 //
 // Set this php version :).
 //
-$version = "1.1";
+define('version', '1.1');
 
 //
 // Set this script release date.
 // Note : Year-Day-Month
 //
-$release = "2013-11-22";
+define('released', '2013-11-23');
 
 //
 // Author for this script ;).
 //
-$author = "Shahril-Munajaf-Akif";
+define('author', 'Shahril-Munajaf-Akif');
 
 //
 // Set if you want to make verbose as default.
@@ -37,7 +38,7 @@ $verbose = false;
 //
 // This section will decide if TMPunk want to output error or not..
 //
-if ($debug_mode == "off") {
+if (!$debug_mode) {
   error_reporting(0);
   set_time_limit(0);
   ini_set('error_log',NULL);
@@ -64,7 +65,7 @@ $il=0; // Use in save/log function
 //
 // CopyRighT ;)
 //
-echo "\n TM Punk {$version}  Copyright (c) {$year} {$author} {$release}\n";
+echo "\n".' TM Punk '.version.'  Copyright (c) '.year.' '.author.' '.released."\n";
 
 
 
@@ -78,11 +79,11 @@ $connectfile_retry_sec = 30;  // set seconds before another redail attempt
 $dl_auto_rnge = 1000; // -auto downstream range.. :)
 
 // Auto collect wifi password from router and create wordlist
-$wifi_pass_collect = true; //If you want this feature, then set true
+$wifi_pass_collect = false; //If you want this feature, then set true
 $wifi_pass_filename = 'wifi-pass.txt';
 
 // Auto collect streamyx username & password and create wordlist
-$autocollect_bool = true;  //If you want this feature, then set true
+$autocollect_bool = false;  //If you want this feature, then set true
 $autocollect_filename = 'streamyx-list.txt';
 $autocollect_range = 3000; //Range streamyx downstream to collect
 
