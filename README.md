@@ -1,4 +1,4 @@
-== TM Punk ==
+#### TM Punk
 
 LICENSE
 
@@ -20,10 +20,10 @@ along with this program. If not, see http://www.gnu.org/licenses/.
 
 mohd_shahril_96 at yahoo dot com
 
-== How this tool about ? == 
+#### How this tool about ?
 
 TM Punk is PHP CLI hacking tool that are able to scan for Streamyx (Malaysia Internet Service Provider) IP range to find public router and able to steal username & password for that router. This tool can also remotely reboot any public router.
 
 Note : This tool I think only work in Malaysian IP Address because this flaw only known work in Malaysia.
 
-Mohd Shahril @ 2013 
+#### Mohd Shahril @ 2013 
