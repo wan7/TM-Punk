@@ -1,5 +1,15 @@
 <?php
 
+// Author : ShahriL
+// Greet  : TBD
+// Note   : Some noobs inside self-claimed hacker groups used my script and
+//          changed it author name and pretended like they was the man who created
+//          this script. So I want to give my middle finger to anyone who changed
+//          the credit. Well, if you want to be a fucking leecher, this is not
+//          your place. Learn how to code yourself and try to give some respect to
+//          original author.
+
+
 //
 // Debug Mode
 //
