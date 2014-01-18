@@ -34,28 +34,23 @@ $debug_mode = false;
 //
 // Set this php year.
 //
-define('year', '2013');
+define('year', '2014');
 
 //
 // Set this php version :).
 //
-define('version', '1.1');
+define('version', '1.2');
 
 //
 // Set this script release date.
 // Note : Year-Day-Month
 //
-define('released', '2013-11-23');
+define('released', '2014-19-01');
 
 //
 // Author for this script ;).
 //
 define('author', 'Shahril-Munajaf-Akif');
-
-//
-// Set if you want to make verbose as default.
-//
-$verbose = false;
 
 //
 // This section will decide if TMPunk want to output error or not..
@@ -80,7 +75,10 @@ date_default_timezone_set('Asia/Kuala_Lumpur');  // Here is important for new PH
 if (PHP_SAPI != 'cli') die("This PHP isn't intend to be run on HTTP Web Server! Use PHP CLI instead.");
 
 // Check if curl is installed on user PHP
-if (!in_array('curl', get_loaded_extensions())) die("\nCurl Library must be installed or enabled to use TMPunk!\n");
+if (!in_array('curl', get_loaded_extensions())) die("\n Curl Library must be installed or enabled to use TMPunk!\n");
+
+// Check if socket is installed on user PHP
+if (!in_array('sockets', get_loaded_extensions())) die("\n Socket Library must be installed or enabled to use TMPunk!\n");
 
 $il=0; // Use in save/log function
 
@@ -88,8 +86,6 @@ $il=0; // Use in save/log function
 // CopyRighT ;)
 //
 echo "\n".' TM Punk '.version.'  Copyright (c) '.year.' '.author.' '.released."\n";
-
-
 
 
 //
@@ -112,8 +108,6 @@ $autocollect_range = 3000; //Range streamyx downstream to collect
 //
 // End Optional Settings
 //
-
-
 
 
 //
@@ -218,6 +212,11 @@ if (isset ($argv[1]) && $argv[1] == "-v") {
     \r - Removed verbose option. (-verbose)
     \r - Code has been cleaned up a bit.
     \r - Fixed lots of bug and coding errors.
+    
+    \r Version 1.2 :-
+    \r - Fixed socket admin permission inside ICMP ping function.
+    \r - Updated speedtest latest result domain.
+    \r - Updated/removed unused code.
 
     \r Thank to : Akif (for log function) and other people to make this
     \r            script possible until this stage. :D
@@ -651,7 +650,7 @@ if (isset ($ip) && isset ($range)) {
   if (in_array("-auto", $argv, true)) {
   
     // check speedtest.com.my server status
-    if (!check_old('http://www.speedtest.com.my/latest_result.php')) die("\nCan't connect with speedtest.com.my ! Please try again later.\n");
+    if (!check_old('http://www.speedtest.com.sg/latest_result.php')) die("\n Can't connect to speedtest.com.sg! Please try again later.\n");
     
     // if server don't offline, then start to get some random ip address..
     $cut = cutstr(file_get_contents('http://www.speedtest.com.my/latest_result.php'), 'System', '</table>');
@@ -743,8 +742,8 @@ if (isset ($ip) && isset ($range)) {
       }
     }
     
-    // if TMpunk can't find any online host, this message will shown up
-    // otherwise, continues with scanning
+    // if TMpunk didn't find any online host, this message will show up
+    // otherwise, continue with scanning
     if (empty ($online) && !$condition) {
       die("
         \r Can't find any HTTP server on {$a}.{$range}!
@@ -797,7 +796,8 @@ if (isset ($ip) && isset ($range)) {
             if (limit ($downstream, $argv[$limit_value])) {
               $il++;
               echo " {$a}.{$i} is {$data_return}\n";
-              echo " Ping time : ".ping ($a.".".$i)."\n";
+              $ping = ping ($a.".".$i);
+              if ( $ping ) echo " Ping time : {$ping}\n";
               if ($geol) echo " Location : ".get_geolocation ($a.".".$i)."\n";
               echo $tunjuk;
               if ($port_scan) port_scan ($a.".".$i, $port_scan, $filesave);
@@ -808,7 +808,8 @@ if (isset ($ip) && isset ($range)) {
           {
             $il++;
             echo " {$a}.{$i} is {$data_return}\n";
-            echo " Ping time : ".ping ($a.".".$i)."\n";
+            $ping = ping ($a.".".$i);
+            if ( $ping ) echo " Ping time : {$ping}\n";
             
             // geolocation ;)
             if ($geol) echo " Location : ".get_geolocation ($a.".".$i)."\n";
@@ -834,7 +835,8 @@ if (isset ($ip) && isset ($range)) {
             if (limit ($downstream, $argv[$limit_value])) {
               $il++;
               echo " {$a}.{$i} is {$data_return}\n";
-              echo " Ping time : ".ping ($a.".".$i)."\n";
+              $ping = ping ($a.".".$i);
+              if ( $ping ) echo " Ping time : {$ping}\n";
               if ($geol) echo " Location : ".get_geolocation ($a.".".$i)."\n";
               echo $tunjuk;
               if ($port_scan) port_scan ($a.".".$i, $filesave);
@@ -843,7 +845,8 @@ if (isset ($ip) && isset ($range)) {
           } else { // if not set any limit, show the data..
             $il++;
             echo " {$a}.{$i} is {$data_return}\n";
-            echo " Ping time : ".ping ($a.".".$i)."\n";
+            $ping = ping ($a.".".$i);
+            if ( $ping ) echo " Ping time : {$ping}\n";
             
             // geolocation ;)
             if ($geol) echo " Location : ".get_geolocation ($a.".".$i)."\n";
@@ -869,7 +872,8 @@ if (isset ($ip) && isset ($range)) {
             if (limit ($downstream, $argv[$limit_value])) {
               $il++;
               echo " {$a}.{$i} is {$data_return}\n";
-              echo " Ping time : ".ping ($a.".".$i)."\n";
+              $ping = ping ($a.".".$i);
+              if ( $ping ) echo " Ping time : {$ping}\n";
               if ($geol) echo " Location : ".get_geolocation ($a.".".$i)."\n";
               echo $tunjuk;
               if ($port_scan) port_scan ($a.".".$i, $port_scan, $filesave);
@@ -878,7 +882,8 @@ if (isset ($ip) && isset ($range)) {
           } else { // if not set any limit, show the data..
             $il++;
             echo " {$a}.{$i} is {$data_return}\n";
-            echo " Ping time : ".ping ($a.".".$i)."\n";
+            $ping = ping ($a.".".$i);
+            if ( $ping ) echo " Ping time : {$ping}\n";
             
             // geolocation ;)
             if ($geol) echo " Location : ".get_geolocation ($a.".".$i)."\n";
@@ -910,7 +915,8 @@ if (isset ($ip) && isset ($range)) {
             if (limit ($downstream, $argv[$limit_value])) {
               $il++;
               echo " {$a}.{$i} is {$data_return}\n";
-              echo " Ping time : ".ping ($a.".".$i)."\n";
+              $ping = ping ($a.".".$i);
+              if ( $ping ) echo " Ping time : {$ping}\n";
               if ($geol) echo " Location : ".get_geolocation ($a.".".$i)."\n";
               echo $tunjuk;
               if ($port_scan) port_scan ($a.".".$i, $port_scan, $filesave);
@@ -919,7 +925,8 @@ if (isset ($ip) && isset ($range)) {
           } else { // if not set any limit, show the data..
             $il++;
             echo " {$a}.{$i} is {$data_return}\n";
-            echo " Ping time : ".ping ($a.".".$i)."\n";
+            $ping = ping ($a.".".$i);
+            if ( $ping ) echo " Ping time : {$ping}\n";
             
             // geolocation ;)
             if ($geol) echo " Location : ".get_geolocation ($a.".".$i)."\n";
@@ -945,7 +952,8 @@ if (isset ($ip) && isset ($range)) {
             if (limit ($downstream, $argv[$limit_value])) {
               $il++;
               echo " {$a}.{$i} is {$data_return}\n";
-              echo " Ping time : ".ping ($a.".".$i)."\n";
+              $ping = ping ($a.".".$i);
+              if ( $ping ) echo " Ping time : {$ping}\n";
               if ($geol) echo " Location : ".get_geolocation ($a.".".$i)."\n";
               echo $tunjuk;
               if ($port_scan) port_scan ($a.".".$i, $port_scan, $filesave);
@@ -954,7 +962,8 @@ if (isset ($ip) && isset ($range)) {
           } else { // if not set any limit, show the data..
             $il++;
             echo " {$a}.{$i} is {$data_return}\n";
-            echo " Ping time : ".ping ($a.".".$i)."\n";
+            $ping = ping ($a.".".$i);
+            if ( $ping ) echo " Ping time : {$ping}\n";
             
             // geolocation ;)
             if ($geol) echo " Location : ".get_geolocation ($a.".".$i)."\n";
@@ -1257,8 +1266,10 @@ function Innacom ($ip, $filesave = "", $wifi = false) {
       if (strpos ($curl, 'parent.location=') !== FALSE) return false;
       
       $curl1 = http_request("http://{$ip}/info.html", $cook, "");
+      
       preg_match_all('/\{(.*?)\}/', cutstr ($curl, "obj2Items", "';"), $f);
       preg_match_all('/\"\<td\>(\d{3,6}?)\<\/td\>\"/', $curl1, $f1);
+      
       if (!empty ($f[1][11]) && !empty ($f[1][12])) {
         $result .= " Streamyx User : ".$f[1][11]."\n";
         $result .= " Streamyx Pass : ".$f[1][12]."\n";
@@ -1813,8 +1824,8 @@ function TpLink ($ip, $filesave, $wifi = false) {
   
   if (!empty ($filesave) && !empty ($Username[2][0])) {
     $data = array(
-        "IP" => $ip,
-        "Router" => "TP-Link",
+        " IP" => $ip,
+        " Router" => "TP-Link",
         " Streamyx User" => $Username[2][0],
         " Streamyx Pass" => $Password[2][0],
         " Upstream" => $rate[11],
@@ -1912,11 +1923,12 @@ function ping ($ip) {
 
   $package = $type.$code.$checksum.$identifier.$seqNumber.$data;
   // And off to the sockets
-  $socket = socket_create(AF_INET, SOCK_RAW, 1);
+  
+  $socket = @socket_create(AF_INET, SOCK_RAW, 1);
   $cond = @socket_connect($socket, $ip, null);
   
   // check if host offline
-  if(!$cond) echo "Unknown!";
+  if(!$cond) return false;
   
   $startTime = microtime(true);
   socket_send($socket, $package, strLen($package), 0);
