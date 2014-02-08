@@ -29,10 +29,10 @@ Note
 Credit
 ------
 
-Mohd Shahril (creator)
-Ammar Munajaf (early developer)
-Akif Rabbani (early developer)
-Lod (lots of good ideas)
+-- Mohd Shahril (creator)
+-- Ammar Munajaf (early developer)
+-- Akif Rabbani (early developer)
+-- Lod (lots of good ideas)
 
 
 TMPunk @ 2014
