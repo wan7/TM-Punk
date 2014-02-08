@@ -1,5 +1,3 @@
-#### TM Punk
-
 # [TMPunk](https://github.com/shahril96/TM-Punk)
 
 LICENSE
