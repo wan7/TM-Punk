@@ -24,7 +24,7 @@ mohd_shahril_96 at yahoo dot com
 Note
 ----
 
-1.2 will be the last public version for this tool. No future updates will be provide after this.
+1.2 will be the last public version for this tool. No future updates will be provided after this.
 
 Credit
 ------
