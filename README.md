@@ -30,8 +30,11 @@ Credit
 ------
 
 -- Mohd Shahril (creator)
+
 -- Ammar Munajaf (early developer)
+
 -- Akif Rabbani (early developer)
+
 -- Lod (lots of good ideas)
 
 
