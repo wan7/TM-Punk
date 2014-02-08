@@ -1,6 +1,7 @@
 #### TM Punk
 
-#### LICENSE
+LICENSE
+-------
 
 TM Punk
 Copyright (C) 2014 Mohd Shahril
@@ -25,4 +26,13 @@ Note
 
 1.2 will be the last public version for this tool. No future updates will be provide after this.
 
-#### Mohd Shahril @ 2013 
+Credit
+------
+
+Mohd Shahril (creator)
+Ammar Munajaf (early developer)
+Akif Rabbani (early developer)
+Lod (lots of good ideas)
+
+
+TMPunk @ 2014
